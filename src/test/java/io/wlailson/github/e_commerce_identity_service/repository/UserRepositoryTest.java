@@ -3,7 +3,6 @@ package io.wlailson.github.e_commerce_identity_service.repository;
 import io.wlailson.github.e_commerce_identity_service.domain.Role;
 import io.wlailson.github.e_commerce_identity_service.domain.User;
 import io.wlailson.github.e_commerce_identity_service.dto.UserResponseMinDTO;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -49,7 +48,9 @@ class UserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        Role role = roleRepository.save(new Role(null, "ROLE_USER"));
+        Role role = roleRepository.findByAuthority("ROLE_USER")
+                .orElseThrow(() -> new IllegalStateException(
+                        "ROLE_USER must be created by the Flyway migration"));
 
         repository.saveAll(List.of(
                 createUser("John Doe", "john@gmail.com", LocalDate.of(1970, 1, 1), role),
