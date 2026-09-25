@@ -1,0 +1,55 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: identity-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - identity_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+
+  identity-service:
+    image: ${IMAGE_NAME}:${IMAGE_TAG}
+    build: .
+    container_name: identity-service
+    restart: unless-stopped
+
+    ports:
+      - "${PORT}:8081"
+
+    environment:
+      APP_PROFILE: ${APP_PROFILE}
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_DURATION: ${JWT_DURATION}
+      JWT_REFRESH_DURATION: ${JWT_REFRESH_DURATION}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      PORT: ${PORT}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  identity_postgres_data:
