@@ -32,11 +32,11 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -t wlailson/study-api-backend:latest \
-            -t wlailson/study-api-backend:${{ github.sha }} \
+            -t wlailson/e-commerce-identity-service:latest \
+            -t wlailson/e-commerce-identity-service:${{ github.sha }} \
             .
 
       - name: Push Docker images
         run: |
-          docker push wlailson/study-api-backend:latest
-          docker push wlailson/study-api-backend:${{ github.sha }}
+          docker push wlailson/e-commerce-identity-service:latest
+          docker push wlailson/e-commerce-identity-service:${{ github.sha }}
