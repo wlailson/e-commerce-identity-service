@@ -23,4 +23,4 @@ cors:
   origins: ${CORS_ORIGINS}
 
 server:
-  port: ${SERVER_PORT}
+  port: ${SERVER_PORT:8080}
