@@ -13,6 +13,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
+
     @Query("""
             SELECT new io.wlailson.github.e_commerce_identity_service.dto.UserResponseMinDTO(obj.id, obj.name, obj.email)
             FROM  User obj
