@@ -1,13 +1,21 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/identity-service
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://localhost:5480/wlailsondb
+    username: wlailson
+    password: wlailson
     driver-class-name: org.postgresql.Driver
+
+  flyway:
+    schemas:
+      - identity
+    default-schema: identity
+    create-schemas: true
+
 
   jpa:
     show-sql: true
     properties:
       hibernate:
+        default_schema: identity
         format_sql: true
         highlight_sql: true

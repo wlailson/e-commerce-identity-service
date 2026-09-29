@@ -1,28 +1,24 @@
 package io.wlailson.github.e_commerce_identity_service.security;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import io.wlailson.github.e_commerce_identity_service.domain.Role;
 import io.wlailson.github.e_commerce_identity_service.domain.User;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
 import java.time.Instant;
 import java.util.Date;
-import javax.crypto.SecretKey;
 
+
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
     private final JwtProperties properties;
-    private final SecretKey signingKey;
-
-    public JwtService(JwtProperties properties) {
-        this.properties = properties;
-        this.signingKey = Keys.hmacShaKeyFor(
-                properties.secret().getBytes(StandardCharsets.UTF_8)
-        );
-    }
+    private final PrivateKey privateKey;
 
     public String generateToken(User user) {
 
@@ -43,7 +39,7 @@ public class JwtService {
                                 now.plusSeconds(properties.duration())
                         )
                 )
-                .signWith(signingKey, Jwts.SIG.HS256)
+                .signWith(privateKey, Jwts.SIG.RS256)
                 .compact();
     }
 }
