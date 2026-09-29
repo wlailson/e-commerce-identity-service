@@ -16,8 +16,6 @@ spring:
 
 jwt:
   duration: ${JWT_DURATION:86400}
-  private-key: ${JWT_PRIVATE_KEY:MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC4aYyIgeNOUp}
-  public-key: ${JWT_PUBLIC_KEY:MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC4aYyIgeNOUpgfgft}
 
 cors:
   origins: ${CORS_ORIGINS:http://localhost:8080}
