@@ -28,45 +28,49 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
+    private static final String ROLE_USER = "ROLE_USER";
+
     private final UserRepository repository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
-    public UserResponseDTO getUserById(Long userId) {
-        return toResponse(loadEntityById(userId));
+    public UserResponseDTO findUserById(Long userId) {
+        return userMapper.toResponse(loadEntityById(userId));
     }
 
     @Transactional(readOnly = true)
-    public Page<UserResponseMinDTO> getAllUsers(Pageable pageable) {
+    public Page<UserResponseMinDTO> findAllUsers(Pageable pageable) {
         return repository.searchAllUsers(pageable);
     }
 
     @Transactional(readOnly = true)
     public UserResponseDTO getUserByEmail(String email) {
-        return toResponse(loadUserByEmail(email));
+        return userMapper.toResponse(loadUserByEmail(email));
     }
 
     @Transactional
-    public UserResponseDTO postUser(UserRequestDTO request) {
+    public UserResponseDTO insertUser(UserRequestDTO request) {
 
         User user = new User();
 
-        applyRequest(user, request);
+        userMapper.applyRequest(user, request);
         user.getRoles().add(
-                roleRepository.findByAuthority("ROLE_USER")
-                        .orElseThrow(() -> new EntityNotFoundException("Role not found: ROLE_USER"))
+                roleRepository.findByAuthority(ROLE_USER)
+                        .orElseThrow(() -> new EntityNotFoundException("Role not found: " + ROLE_USER))
         );
 
         user.setPassword(passwordEncoder.encode(request.password()));
 
-        return toResponse(repository.save(user));
+        return userMapper.toResponse(repository.save(user));
     }
 
     @Transactional
-    public UserResponseDTO putUser(
+    public UserResponseDTO updateUser(
             Long userId,
             UserRequestDTO request,
             Authentication authentication
@@ -74,13 +78,13 @@ public class UserService {
         User user = loadEntityById(userId);
         assertCanModify(user, authentication);
 
-        applyRequest(user, request);
+        userMapper.applyRequest(user, request);
 
         if (StringUtils.hasText(request.password())) {
             user.setPassword(passwordEncoder.encode(request.password()));
         }
 
-        return toResponse(repository.save(user));
+        return userMapper.toResponse(repository.save(user));
     }
 
     @Transactional
@@ -120,11 +124,11 @@ public class UserService {
     }
 
     private void assertCanModify(User user, Authentication authentication) {
-        if (hasAuthority(authentication, "ROLE_ADMIN")) {
+        if (hasAuthority(authentication, ROLE_ADMIN)) {
             return;
         }
 
-        if (hasAuthority(authentication, "ROLE_USER")
+        if (hasAuthority(authentication, ROLE_USER)
                 && authentication.getName().equals(user.getEmail())) {
             return;
         }
@@ -133,7 +137,7 @@ public class UserService {
     }
 
     private void assertCanDelete(User user, Authentication authentication) {
-        if (!hasAuthority(authentication, "ROLE_ADMIN")) {
+        if (!hasAuthority(authentication, ROLE_ADMIN)) {
             throw new AccessDeniedException("Usuário não autorizado a excluir este recurso");
         }
     }
@@ -143,21 +147,5 @@ public class UserService {
                 && authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(authority::equals);
-    }
-
-    private void applyRequest(User user, UserRequestDTO request) {
-        user.setName(request.name());
-
-        user.setEmail(request.email());
-
-        user.setPhone(request.phone());
-
-        user.setBirthDate(request.birthDate());
-
-    }
-
-    private UserResponseDTO toResponse(User user) {
-
-        return new UserResponseDTO(user);
     }
 }
