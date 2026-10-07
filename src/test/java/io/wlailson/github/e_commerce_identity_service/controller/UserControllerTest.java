@@ -62,7 +62,7 @@ class UserControllerTest {
         @Test
         @WithMockUser(roles = "ADMIN")
         void shouldReturnUserForAdmin() throws Exception {
-            when(service.getUserById(USER_ID)).thenReturn(userResponse());
+            when(service.findUserById(USER_ID)).thenReturn(userResponse());
 
             mockMvc.perform(get("/users/{userId}", USER_ID))
                     .andExpect(status().isOk())
@@ -71,7 +71,7 @@ class UserControllerTest {
                     .andExpect(jsonPath("$.email").value(USER_EMAIL))
                     .andExpect(jsonPath("$.roles[0]").value("ROLE_USER"));
 
-            verify(service).getUserById(USER_ID);
+            verify(service).findUserById(USER_ID);
         }
 
         @Test
@@ -94,7 +94,7 @@ class UserControllerTest {
         @Test
         @WithMockUser(roles = "ADMIN")
         void shouldReturnPagedUsersForAdmin() throws Exception {
-            when(service.getAllUsers(any())).thenReturn(
+            when(service.findAllUsers(any())).thenReturn(
                     new PageImpl<>(
                             List.of(new UserResponseMinDTO(USER_ID, "Maria", USER_EMAIL)),
                             PageRequest.of(1, 5),
@@ -111,7 +111,7 @@ class UserControllerTest {
 
             ArgumentCaptor<org.springframework.data.domain.Pageable> pageable =
                     ArgumentCaptor.forClass(org.springframework.data.domain.Pageable.class);
-            verify(service).getAllUsers(pageable.capture());
+            verify(service).findAllUsers(pageable.capture());
             assertThat(pageable.getValue().getPageNumber()).isEqualTo(1);
             assertThat(pageable.getValue().getPageSize()).isEqualTo(5);
         }
@@ -163,7 +163,7 @@ class UserControllerTest {
 
         @Test
         void shouldCreateUserWithoutAuthentication() throws Exception {
-            when(service.postUser(any(UserRequestDTO.class))).thenReturn(userResponse());
+            when(service.insertUser(any(UserRequestDTO.class))).thenReturn(userResponse());
 
             mockMvc.perform(post("/users")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -172,7 +172,7 @@ class UserControllerTest {
                     .andExpect(header().string("Location", "http://localhost/users/" + USER_ID))
                     .andExpect(jsonPath("$.email").value(USER_EMAIL));
 
-            verify(service).postUser(any(UserRequestDTO.class));
+            verify(service).insertUser(any(UserRequestDTO.class));
         }
 
         @Test
@@ -209,7 +209,7 @@ class UserControllerTest {
         @Test
         @WithMockUser(roles = "ADMIN")
         void shouldUpdateUserForAuthenticatedUser() throws Exception {
-            when(service.putUser(any(Long.class), any(UserRequestDTO.class), any()))
+            when(service.updateUser(any(Long.class), any(UserRequestDTO.class), any()))
                     .thenReturn(userResponse());
 
             mockMvc.perform(put("/users/{userId}", USER_ID)
@@ -219,13 +219,13 @@ class UserControllerTest {
                     .andExpect(jsonPath("$.id").value(USER_ID))
                     .andExpect(jsonPath("$.name").value("Maria"));
 
-            verify(service).putUser(any(Long.class), any(UserRequestDTO.class), any());
+            verify(service).updateUser(any(Long.class), any(UserRequestDTO.class), any());
         }
 
         @Test
         @WithMockUser(roles = "USER")
         void shouldAllowRegularUser() throws Exception {
-            when(service.putUser(any(Long.class), any(UserRequestDTO.class), any()))
+            when(service.updateUser(any(Long.class), any(UserRequestDTO.class), any()))
                     .thenReturn(userResponse());
 
             mockMvc.perform(put("/users/{userId}", USER_ID)

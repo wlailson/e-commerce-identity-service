@@ -88,7 +88,7 @@ class UserServiceTest {
         void shouldReturnUserWhenIdExists() {
             Mockito.when(repository.findById(id)).thenReturn(Optional.of(existingUser));
 
-            UserResponseDTO response = service.getUserById(id);
+            UserResponseDTO response = service.findUserById(id);
 
             Assertions.assertNotNull(response);
             Assertions.assertEquals(existingUser.getId(), response.id());
@@ -104,7 +104,7 @@ class UserServiceTest {
         void shouldThrowEntityNotFoundExceptionWhenIdDoesNotExist() {
             Mockito.when(repository.findById(nonExistingId)).thenReturn(Optional.empty());
 
-            Assertions.assertThrows(EntityNotFoundException.class, () -> service.getUserById(nonExistingId));
+            Assertions.assertThrows(EntityNotFoundException.class, () -> service.findUserById(nonExistingId));
             Mockito.verify(repository).findById(nonExistingId);
         }
     }
@@ -120,7 +120,7 @@ class UserServiceTest {
 
             Mockito.when(repository.searchAllUsers(pageable)).thenReturn(page);
 
-            Page<UserResponseMinDTO> response = service.getAllUsers(pageable);
+            Page<UserResponseMinDTO> response = service.findAllUsers(pageable);
 
             Assertions.assertEquals(1, response.getTotalElements());
             Assertions.assertEquals("Maria", response.getContent().get(0).name());
@@ -173,7 +173,7 @@ class UserServiceTest {
             Mockito.when(repository.save(Mockito.any(User.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
-            UserResponseDTO response = service.postUser(newUser);
+            UserResponseDTO response = service.insertUser(newUser);
 
             Assertions.assertTrue(response.roles().contains("ROLE_USER"));
             Mockito.verify(repository).save(Mockito.argThat(saved ->
@@ -195,7 +195,7 @@ class UserServiceTest {
             Mockito.when(passwordEncoder.encode("newpassword")).thenReturn(encodedPassword);
             Mockito.when(repository.save(existingUser)).thenReturn(existingUser);
 
-            service.putUser(existingUser.getId(), request, userAuthentication);
+            service.updateUser(existingUser.getId(), request, userAuthentication);
 
             Mockito.verify(repository).findById(existingUser.getId());
             Mockito.verify(passwordEncoder).encode("newpassword");
@@ -213,7 +213,7 @@ class UserServiceTest {
             Mockito.when(repository.findById(nonExistingId)).thenReturn(Optional.empty());
 
             Assertions.assertThrows(EntityNotFoundException.class,
-                    () -> service.putUser(nonExistingId, request, userAuthentication));
+                    () -> service.updateUser(nonExistingId, request, userAuthentication));
             Mockito.verify(repository).findById(nonExistingId);
             Mockito.verify(passwordEncoder, Mockito.never()).encode(Mockito.anyString());
             Mockito.verify(repository, Mockito.never()).save(Mockito.any(User.class));
@@ -231,7 +231,7 @@ class UserServiceTest {
             Mockito.when(repository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
             Mockito.when(repository.save(existingUser)).thenReturn(existingUser);
 
-            service.putUser(existingUser.getId(), user, userAuthentication);
+            service.updateUser(existingUser.getId(), user, userAuthentication);
 
             Assertions.assertEquals("Maria2", existingUser.getName());
             Mockito.verify(repository).save(existingUser);
@@ -248,7 +248,7 @@ class UserServiceTest {
 
             Assertions.assertThrows(
                     org.springframework.security.access.AccessDeniedException.class,
-                    () -> service.putUser(anotherUser.getId(), request, userAuthentication)
+                    () -> service.updateUser(anotherUser.getId(), request, userAuthentication)
             );
             Mockito.verify(repository, Mockito.never()).save(anotherUser);
         }

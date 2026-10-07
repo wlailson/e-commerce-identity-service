@@ -44,11 +44,11 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    public ResponseEntity<UserResponseDTO> getUserById(
+    public ResponseEntity<UserResponseDTO> findUserById(
             @Parameter(description = "Identificador do usuário", example = "1")
             @PathVariable Long userId
     ) {
-        return ResponseEntity.ok(service.getUserById(userId));
+        return ResponseEntity.ok(service.findUserById(userId));
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -60,10 +60,10 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
             @ApiResponse(responseCode = "403", description = "Usuário sem permissão de administrador")
     })
-    public ResponseEntity<Page<UserResponseMinDTO>> getAllUsers(
+    public ResponseEntity<Page<UserResponseMinDTO>> findAllUsers(
             @ParameterObject Pageable pageable
     ) {
-        return ResponseEntity.ok(service.getAllUsers(pageable));
+        return ResponseEntity.ok(service.findAllUsers(pageable));
     }
 
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
@@ -75,7 +75,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    public ResponseEntity<UserResponseDTO> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<UserResponseDTO> findCurrentUser(Authentication authentication) {
         return  ResponseEntity.ok(service.getUserByEmail(authentication.getName()));
     }
 
@@ -86,11 +86,11 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    public ResponseEntity<UserResponseDTO> postUser(
+    public ResponseEntity<UserResponseDTO> insertUser(
             @RequestBody @Valid UserRequestDTO request
     ) {
 
-        UserResponseDTO response = service.postUser(request);
+        UserResponseDTO response = service.insertUser(request);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequestUri()
@@ -133,7 +133,7 @@ public class UserController {
             @RequestBody @Valid UserRequestDTO request,
             Authentication authentication
     ) {
-        return ResponseEntity.ok(service.putUser(userId, request, authentication));
+        return ResponseEntity.ok(service.updateUser(userId, request, authentication));
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
