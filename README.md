@@ -11,6 +11,10 @@ Serviço responsável pelo cadastro e consulta de usuários, autenticação e em
 - springdoc-openapi / Swagger UI.
 - Testes com JUnit Jupiter, Mockito e Testcontainers para PostgreSQL.
 
+## Swagger
+
+[📚 Acessar Swagger](https://wlailson.github.io/e-commerce-identity-service/)
+
 ## Executar localmente
 
 Pré-requisitos: JDK 25, Maven Wrapper e uma instância PostgreSQL acessível. O perfil padrão de desenvolvimento está em `src/main/resources/application-dev.yaml`; ajuste a configuração local do banco e as chaves JWT antes de iniciar.
